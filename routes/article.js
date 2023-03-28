@@ -8,8 +8,11 @@ router.get('/proof-test', ArticleController.test)
 router.get('/course', ArticleController.course)
 
 // Route useful
-
 router.post('/create', ArticleController.create);
+router.get('/articles/:limit?', ArticleController.getArticles);
+router.get('/article/:id', ArticleController.one);
+router.delete('/article/:id', ArticleController.eliminate);
+router.put('/article/:id', ArticleController.update);
 
 
 

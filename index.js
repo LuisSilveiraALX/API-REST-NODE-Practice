@@ -16,7 +16,8 @@ const port = 3001;
  app.use(cors()); 
 
 // Convert body to JS object
-app.use(express.json());
+app.use(express.json()); // receive data with content-type app /json
+app.use(express.urlencoded({extended:true})) // conversor form-urlencoded to json object
 
 // Routes
 const routes_articles = require('./routes/article')
