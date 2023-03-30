@@ -1,4 +1,6 @@
-const {validateArticle} = require('../helper/validate')
+const fs = require('fs');
+const path = require('path');
+const { validateArticle } = require('../helper/validate')
 const Article = require('../models/Article')
 
 const test = (req, res) => {
@@ -183,18 +185,109 @@ const upload = (req, res) => {
   // config librare multer
 
   // pick up the image file
-
+  if (!req.file && !req.files) {
+    return res.status(404).json({
+      status: "error",
+      message: "invalid request"
+    })
+  }
   // name file
+  let archive = req.file.originalname;
 
   // file extension
+  let archive_split = archive.split('\.');
+  let extension = archive_split[1];
 
   // check the extension
+  if (extension != "png" && extension != "jpg" &&
+    extension != "jpeg" && extension != "gif") {
 
-  // if everything is correct, update article
+    // delete archive and response
+    fs.unlink(req.file.path, (error) => {
+      return res.status(400).json({
+        status: "error",
+        message: "image invalidate"
+      })
+    })
+  } else {
+    let articleId = req.params.id
 
-  return res.status(200).json({
-    status: 'success'
-  })
+    const articleUpdate = async () => {
+      try {
+        const updatedArticle = await Article.findByIdAndUpdate(articleId, { image: req.file.filename }, { new: true });
+
+        if (!updatedArticle) {
+          return res.status(404).json({
+            status: "error",
+            message: "Error article update"
+          });
+        }
+
+        return res.status(200).json({
+          status: "success",
+          article: updatedArticle,
+          ficher: req.file
+        });
+      } catch (error) {
+        return res.status(500).json({
+          status: "error",
+          message: "Server error",
+        });
+      }
+    }
+
+    articleUpdate();
+  }
+}
+
+
+const image = (req, res) => {
+  let ficher = req.params.ficher;
+  let ruta = path.resolve(`./images/articles/${ficher}`);
+
+  fs.stat(ruta, (error, exists) => {
+    if (exists) {
+      return res.sendFile(ruta);
+    } else {
+      return res.status(404).json({
+        status: "error",
+        message: "Image doesn't exist"
+      });
+    }
+  });
+};
+
+const search = async (req, res) => {
+
+ try {
+  let search = req.params.search;
+
+  const articleSearch = await Article.find({ 
+    '$or': [
+      {'title': { '$regex': search, '$options': 'i'}},
+      {'content': { '$regex': search, '$options': 'i'}},
+  ]})
+  .sort({date: -1})
+  .exec();
+
+    if (!articleSearch || articleSearch.length <= 0) {
+      return res.status(404).json({
+        status:'error',
+        message:'No articles found'
+      });
+    }
+
+    return res.status(200).json({
+      status:'success',
+      article: articleSearch
+    })
+  
+ } catch (error) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Internal server error'
+    })
+ }
 }
 
 module.exports = {
@@ -205,5 +298,7 @@ module.exports = {
   one,
   eliminate,
   update,
-  upload
+  upload,
+  image,
+  search
 }
