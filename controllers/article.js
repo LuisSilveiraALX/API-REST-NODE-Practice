@@ -7,7 +7,7 @@ const test = (req, res) => {
   return res.status(200).json({
     mensaje: "test"
   })
-}
+};
 
 const course = (request, response) => {
 
@@ -54,7 +54,7 @@ const create = async (req, res) => {
         mensaje: "Article not saved",
       });
     });
-}
+};
 
 const getArticles = async (req, res) => {
   try {
@@ -111,7 +111,7 @@ const one = async (req, res) => {
       message: error.message,
     });
   }
-}
+};
 
 const eliminate = async (req, res) => {
   try {
@@ -137,8 +137,7 @@ const eliminate = async (req, res) => {
       message: error.message,
     });
   }
-}
-
+};
 
 const update = async (req, res) => {
 
@@ -178,7 +177,7 @@ const update = async (req, res) => {
       message: 'server error',
     });
   }
-}
+};
 
 const upload = (req, res) => {
 
@@ -238,7 +237,7 @@ const upload = (req, res) => {
 
     articleUpdate();
   }
-}
+};
 
 
 const image = (req, res) => {
@@ -259,36 +258,37 @@ const image = (req, res) => {
 
 const search = async (req, res) => {
 
- try {
-  let search = req.params.search;
+  try {
+    let search = req.params.search;
 
-  const articleSearch = await Article.find({ 
-    '$or': [
-      {'title': { '$regex': search, '$options': 'i'}},
-      {'content': { '$regex': search, '$options': 'i'}},
-  ]})
-  .sort({date: -1})
-  .exec();
+    const articleSearch = await Article.find({
+      '$or': [
+        { 'title': { '$regex': search, '$options': 'i' } },
+        { 'content': { '$regex': search, '$options': 'i' } },
+      ]
+    })
+      .sort({ date: -1 })
+      .exec();
 
     if (!articleSearch || articleSearch.length <= 0) {
       return res.status(404).json({
-        status:'error',
-        message:'No articles found'
+        status: 'error',
+        message: 'No articles found'
       });
     }
 
     return res.status(200).json({
-      status:'success',
+      status: 'success',
       article: articleSearch
     })
-  
- } catch (error) {
+
+  } catch (error) {
     return res.status(500).json({
       status: 'error',
       message: 'Internal server error'
     })
- }
-}
+  }
+};
 
 module.exports = {
   test,
